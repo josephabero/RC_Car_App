@@ -3,16 +3,38 @@
 
 import paho.mqtt.client as mqtt
 import RPi.GPIO as gpio
+import subprocess
+
+LEFT_GPIO       = 18
+BACK_GPIO       = 12
+FORWARD_GPIO    = 13
+RIGHT_GPIO      = 19
+
 
 
 def gpioSetup():
     
     gpio.setmode(gpio.BCM)
-    gpio.setup(21, gpio.OUT)
-    gpio.setup(20, gpio.OUT)
-    gpio.setup(16, gpio.OUT)
-    gpio.setup(12, gpio.OUT)
+    gpio.setup(LEFT_GPIO, gpio.OUT)
+    gpio.setup(RIGHT_GPIO, gpio.OUT)
+    gpio.setup(FORWARD_GPIO, gpio.OUT)
+    gpio.setup(BACK_GPIO, gpio.OUT)
+    
+    pwmLeft = gpio.PWM(LEFT_GPIO, 200)
+    pwmLeft.start(0)
+    pwmRight = gpio.PWM(RIGHT_GPIO, 200)
+    pwmRight.start(0)
+    pwmForward = gpio.PWM(FORWARD_GPIO, 200)
+    pwmForward.start(0)
+    pwmBack = gpio.PWM(BACK_GPIO, 200)
+    pwmBack.start(0)
 
+def parseMessage(message):
+    return message.split()[1], message.split()[3], message.split()[5]
+    
+    
+    # for word in message.split():
+    #   if(word == "button") 
 
 def connectionStatus(client, userdata, flags, rc):
     if rc == 0:
@@ -22,31 +44,58 @@ def connectionStatus(client, userdata, flags, rc):
 
 def messageDecoder(client, userdata, msg):
     message = msg.payload.decode(encoding = 'UTF-8')
+    print(message)
+    buttonVal, dCycVal, freqVal = parseMessage(message)
     
-    if message == "rightOn":
-        gpio.output(21, gpio.HIGH)
-        print("Right LED is ON")
-    elif message == "rightOff":
-        gpio.output(21, gpio.LOW)
-        print("Right LED is OFF")
-    elif message == "backOn":
-        gpio.output(16, gpio.HIGH)
-        print("Back LED is ON")
-    elif message == "backOff":
-        gpio.output(16, gpio.LOW)
-        print("Back LED is OFF")
-    elif message == "forwardOn":
-        gpio.output(20, gpio.HIGH)
-        print("Forward LED is ON")
-    elif message == "forwardOff":
-        gpio.output(20, gpio.LOW)
-        print("Forward LED is OFF")
-    elif message == "leftOn":
-        gpio.output(12, gpio.HIGH)
-        print("Left LED is ON")
-    elif message == "leftOff":
-        gpio.output(12, gpio.LOW)
-        print("Left LED is OFF")
+    print (buttonVal + ": " + str(buttonVal == "rightOn"))
+    
+    if buttonVal == "rightOn":
+        # gpio.output(RIGHT_GPIO, gpio.HIGH)
+        # pwmRight.changeDutyCycle(100)
+        # execfile("pwmTest.py")
+        # subprocess.call("~/Documents/RC_Car_App/pwmTest.py", shell=True)
+        pwmTest = subprocess.Popen(["python", "pwmTest.py", freqVal, dCycVal]) 
+        
+        poll = pwmTest.poll()
+        if poll == None:
+            print("Right LED is ON")
+        
+    # elif buttonVal == "rightOff":
+        # gpio.output(RIGHT_GPIO, gpio.LOW)
+        # # pwmRight.changeDutyCycle(0)
+        # print("Right LED is OFF")
+        
+    # elif buttonVal == "backOn":
+        # gpio.output(BACK_GPIO, gpio.HIGH)
+        # # pwmBack.changeDutyCycle(100)
+        # print("Back LED is ON")
+        
+    # elif buttonVal == "backOff":
+        # gpio.output(BACK_GPIO, gpio.LOW)
+        # # pwmBack.changeDutyCycle(0)
+        # print("Back LED is OFF")
+        
+    # elif buttonVal == "forwardOn":
+        # gpio.output(FORWARD_GPIO, gpio.HIGH)
+        # # pwmForward.changeDutyCycle(100)
+        # print("Forward LED is ON")
+        
+    # elif buttonVal == "forwardOff":
+        # gpio.output(FORWARD_GPIO, gpio.LOW)
+        # print("Forward LED is OFF")
+        
+    # elif buttonVal == "leftOn":
+        # gpio.output(LEFT_GPIO, gpio.HIGH)
+        # print("Left LED is ON")
+        
+    # elif buttonVal == "leftOff":
+        # gpio.output(LEFT_GPIO, gpio.LOW)
+        # print("Left LED is OFF")
+        
+    # elif buttonVal == "leftLong":
+        
+        # print("Left Long Pressed. Attempting PWM")
+        
     else:
         print("Unknown message!: " + message)
 
