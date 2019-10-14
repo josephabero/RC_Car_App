@@ -13,6 +13,7 @@ FORWARD_GPIO    = 13
 RIGHT_GPIO      = 19
 
 processList = {LEFT_GPIO: 0, RIGHT_GPIO: 0}
+pwmList = []
 
 def gpioSetup():
 
@@ -29,10 +30,10 @@ def gpioSetup():
     gpio.setup(BACK_GPIO, gpio.OUT)
     
     print("Initializing PWM")
-    initializePWM(LEFT_GPIO,    200, 0)
-    initializePWM(RIGHT_GPIO,   200, 0)
-    initializePWM(FORWARD_GPIO, 200, 0)
-    initializePWM(BACK_GPIO,    200, 0)
+    initializePWM(LEFT_GPIO,    100, 0)
+    initializePWM(RIGHT_GPIO,   100, 0)
+    initializePWM(FORWARD_GPIO, 100, 0)
+    initializePWM(BACK_GPIO,    100, 0)
 
 
 def parseMessage(message):
@@ -53,11 +54,14 @@ def runPWM(gpioPin, dutyCycle, freq):
 def connectionStatus(client, userdata, flags, rc):
     if rc == 0:
         print("Connected!")
-        print(client.subscribe("rpi/gpio"))
+        # print(client.subscribe("rpi/gpio"))
+        client.subscribe("rpi/gpio")
+        print("Subscribed to topic: rpi/gpio")
     
 def initializePWM(gpioPin, freq, dutyCycle):
     pwm = gpio.PWM(gpioPin, freq)
     pwm.start(dutyCycle)
+    pwmList.append(pwm);
     
 def resetGPIO():
     gpio.output(RIGHT_GPIO, gpio.LOW)
@@ -67,34 +71,66 @@ def resetGPIO():
 
 def messageDecoder(client, userdata, msg):
     message = msg.payload.decode(encoding = 'UTF-8')
-    print("Message: " + message)
+    # print("Message: " + message)
     # buttonVal, dCycVal, freqVal = parseMessage(message)
     buttonVal = parseMessage(message)
+    dCycVal = 0
+    freqVal = 0
     gpioPin = 12
     
     validMessage = True
     
+    # # BASIC GPIO TESTING
+    # if buttonVal == "rButton":
+        # print("Right LED is ON")
+        # gpio.output(RIGHT_GPIO, gpio.HIGH)
+        # gpioPin = RIGHT_GPIO
+    # elif buttonVal == "lButton":
+        # print("Left LED is ON")
+        # gpio.output(LEFT_GPIO, gpio.HIGH)
+        # gpioPin = LEFT_GPIO
+    # elif buttonVal == "bButton":
+        # print("Back LED is ON")
+        # gpio.output(BACK_GPIO, gpio.HIGH)
+        # gpioPin = BACK_GPIO
+    # elif buttonVal == "fButton":
+        # print("Forward LED is ON")
+        # gpio.output(FORWARD_GPIO, gpio.HIGH)
+        # gpioPin = FORWARD_GPIO
+    # elif buttonVal == "sButton":
+        # print("Stop LED is ON")
+        # gpio.output(FORWARD_GPIO, gpio.HIGH)
+        # gpioPin = FORWARD_GPIO
+    print(pwmList
+        
+    # BASIC GPIO TESTING
     if buttonVal == "rButton":
-        print("Right LED is ON")
-        gpio.output(RIGHT_GPIO, gpio.HIGH)
-        gpioPin = RIGHT_GPIO
+        # print("Turning RIGHT")
+        print("Right LED")
+        # gpio.output(RIGHT_GPIO, gpio.HIGH)
+        # gpioPin = RIGHT_GPIO
+        # dCycVal = 130
+        
     elif buttonVal == "lButton":
-        print("Left LED is ON")
+        print("Left LED")
         gpio.output(LEFT_GPIO, gpio.HIGH)
         gpioPin = LEFT_GPIO
     elif buttonVal == "bButton":
-        print("Back LED is ON")
+        print("Back LED")
         gpio.output(BACK_GPIO, gpio.HIGH)
         gpioPin = BACK_GPIO
     elif buttonVal == "fButton":
-        print("Forward LED is ON")
+        print("Forward LED")
         gpio.output(FORWARD_GPIO, gpio.HIGH)
         gpioPin = FORWARD_GPIO
     elif buttonVal == "sButton":
-        print("Stop LED is ON")
-        gpio.output(FORWARD_GPIO, gpio.HIGH)
-        gpioPin = FORWARD_GPIO_GPIO
+        print("Reset All LEDs")
+        # gpio.output(FORWARD_GPIO, gpio.HIGH)
+        # gpioPin = FORWARD_GPIO
+        resetGPIO()
     
+    
+    # # LEGACY GPIO TESTING
     # if buttonVal == "rightOn":
         # gpio.output(RIGHT_GPIO, gpio.HIGH)
         # pwmRight.changeDutyCycle(100)
@@ -155,11 +191,11 @@ def messageDecoder(client, userdata, msg):
         # runPWM(gpioPin, dCycVal, freqVal)
         # print("PWM set")
      
-    sleep(.1)
-    resetGPIO()
-    sleep(.1)
-    print(runPWM(gpioPin, 50, 1000))
-    print(processList)
+    # sleep(.1)
+    # resetGPIO()
+    # sleep(.1)
+    # print(runPWM(gpioPin, 50, 1000))
+    # print(processList)
     
 
 def main():
