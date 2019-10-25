@@ -7,8 +7,8 @@ import subprocess
 from time import sleep
 import os
 
-STEER_SERVO         = 18
-THROTTLE_SERVO      = 12
+STEER_SERVO         = 12
+THROTTLE_SERVO      = 18
 CURRENT_DIR         = 0
 CURRENT_SPEED       = 0
 
@@ -22,8 +22,8 @@ def gpioSetup():
     gpio.setup(THROTTLE_SERVO, gpio.OUT)
     
     print("Initializing PWM")
-    initializePWM(STEER_SERVO,      100, 0)
-    initializePWM(THROTTLE_SERVO,   100, 0)
+    initializePWM(STEER_SERVO,      50, 0)
+    initializePWM(THROTTLE_SERVO,   50, 0)
 
 
 def parseMessage(message):
@@ -57,46 +57,49 @@ def resetGPIO():
     gpio.output(STEER_SERVO,    gpio.LOW)
 
 def turnRight():
-    global STEER_SERVO, CURRENT_DIR
-    right = 20
-    if(CURRENT_DIR <= right):
-        for duty in range(CURRENT_DIR,right,1):
-            pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            sleep(0.01)
-    else:
-        for duty in range(CURRENT_DIR,right,-1):
-            pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            sleep(0.01)
-    
-    CURRENT_DIR = right;
+    global STEER_SERVO, CURRENT_DIR, pwmList
+    # right = 20
+    # if(CURRENT_DIR <= right):
+        # for duty in range(CURRENT_DIR,right,1):
+            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
+            # sleep(0.01)
+    # else:
+        # for duty in range(CURRENT_DIR,right,-1):
+            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
+            # sleep(0.01)
+    pwmList[STEER_SERVO].ChangeDutyCycle(10)
+    return
+    # CURRENT_DIR = right;
 
 def turnLeft():
     global STEER_SERVO, CURRENT_DIR
-    left = 0
-    if(CURRENT_DIR <= left):
-        for duty in range(CURRENT_DIR,left,1):
-            pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            sleep(0.01)
-    else:
-        for duty in range(CURRENT_DIR,left,-1):
-            pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            sleep(0.01)
-    
+    # left = 0
+    # if(CURRENT_DIR <= left):
+        # for duty in range(CURRENT_DIR,left,1):
+            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
+            # sleep(0.01)
+    # else:
+        # for duty in range(CURRENT_DIR,left,-1):
+            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
+            # sleep(0.01)
+    pwmList[STEER_SERVO].ChangeDutyCycle(5)
+    return
     CURRENT_DIR = left;
 
 def centerDir():
     global STEER_SERVO, CURRENT_DIR
     
-    center = 5
-    if(CURRENT_DIR <= center):
-        for duty in range(CURRENT_DIR,center,1):
-            pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            sleep(0.01)
-    else:
-        for duty in range(CURRENT_DIR,center,-1):
-            pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            sleep(0.01)
-    
+    # center = 5
+    # if(CURRENT_DIR <= center):
+        # for duty in range(CURRENT_DIR,center,1):
+            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
+            # sleep(0.01)
+    # else:
+        # for duty in range(CURRENT_DIR,center,-1):
+            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
+            # sleep(0.01)
+    pwmList[STEER_SERVO].ChangeDutyCycle(7.5)
+    return
     CURRENT_DIR = center;
 
 def move():
@@ -111,10 +114,12 @@ def move():
 def stop():
     global THROTTLE_SERVO, CURRENT_SPEED
 
-    stopSpeed = 0
-    for duty in range(CURRENT_SPEED,stopSpeed,-1):
-        pwmList[THROTTLE_SERVO].ChangeDutyCycle(duty)
-        sleep(0.01)
+    # stopSpeed = 0
+    # for duty in range(CURRENT_SPEED,stopSpeed,-1):
+        # pwmList[THROTTLE_SERVO].ChangeDutyCycle(duty)
+        # sleep(0.01)
+    
+    
     CURRENT_SPEED = stopSpeed
 
 def messageDecoder(client, userdata, msg):

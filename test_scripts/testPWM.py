@@ -11,11 +11,11 @@ from time import sleep
 # FREQ
 # DUTY CYC
 
-ledpin = 18			# PWM pin connected to LED
+ledpin = 12			# PWM pin connected to LED
 GPIO.setwarnings(False)			#disable warnings
 GPIO.setmode(GPIO.BCM)		#set pin numbering system
 GPIO.setup(ledpin,GPIO.OUT)
-pi_pwm = GPIO.PWM(ledpin,100)		#create PWM instance with frequency
+pi_pwm = GPIO.PWM(ledpin,50)		#create PWM instance with frequency
 pi_pwm.start(0)				#start PWM of required Duty Cycle 
 
 # pi_pwm.ChangeDutyCycle(100)
