@@ -105,10 +105,12 @@ def centerDir():
 def move():
     global THROTTLE_SERVO, CURRENT_SPEED
 
-    maxSpeed = 20
-    for duty in range(CURRENT_SPEED,maxSpeed,1):
-        pwmList[THROTTLE_SERVO].ChangeDutyCycle(duty)
-        sleep(0.01)
+    # maxSpeed = 20
+    # for duty in range(CURRENT_SPEED,maxSpeed,1):
+        # pwmList[THROTTLE_SERVO].ChangeDutyCycle(duty)
+        # sleep(0.01)
+        
+    pwmList[THROTTLE_SERVO].ChangeDutyCycle(8.35)
     CURRENT_SPEED = maxSpeed
 
 def stop():
@@ -119,7 +121,7 @@ def stop():
         # pwmList[THROTTLE_SERVO].ChangeDutyCycle(duty)
         # sleep(0.01)
     
-    
+    pwmList[THROTTLE_SERVO].ChangeDutyCycle(7.5)
     CURRENT_SPEED = stopSpeed
 
 def messageDecoder(client, userdata, msg):

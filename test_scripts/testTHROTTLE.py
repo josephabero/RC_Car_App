@@ -19,7 +19,7 @@ GPIO.setup(ledpin,GPIO.OUT)
 pi_pwm = GPIO.PWM(ledpin,50)		#create PWM instance with frequency
 pi_pwm.start(0)				#start PWM of required Duty Cycle 
 
-sleep(2)
+# sleep(2)
 # print("setting high duty cycle")
 # pi_pwm.ChangeDutyCycle(10);
 # sleep(10)
