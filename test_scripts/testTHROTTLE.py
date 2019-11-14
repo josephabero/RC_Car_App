@@ -55,18 +55,18 @@ while True:
     print("stop")
     pi_pwm.ChangeDutyCycle(7.5)
 
-    sleep(3)
-    print("back")
-    pi_pwm.ChangeDutyCycle(7)
-    sleep(3)
+    # sleep(3)
+    # print("back")
+    # pi_pwm.ChangeDutyCycle(7)
+    # sleep(3)
     
-    print("super back")
-    pi_pwm.ChangeDutyCycle(5)
-    sleep(2)
+    # print("super back")
+    # pi_pwm.ChangeDutyCycle(5)
+    # sleep(2)
     
-    print("stop")
-    pi_pwm.ChangeDutyCycle(7.5)
-    sleep(3)
+    # print("stop")
+    # pi_pwm.ChangeDutyCycle(7.5)
+    # sleep(3)
 
     
 
