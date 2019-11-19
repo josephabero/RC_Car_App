@@ -159,6 +159,7 @@ def getch():
                 else:
                     print("ball not found")
                     sleep(0.5)
+                sleep(.1)
 
         # update the points queue
         #pts.appendleft(center)
@@ -237,6 +238,7 @@ def turnRight():
             # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
             # sleep(0.01)
     pwmList[STEER_SERVO].ChangeDutyCycle(10)
+    sleep(.1)
     return
     # CURRENT_DIR = right;
 
@@ -252,8 +254,8 @@ def turnLeft():
             # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
             # sleep(0.01)
     pwmList[STEER_SERVO].ChangeDutyCycle(5)
+    sleep(.1)
     return
-    CURRENT_DIR = left;
 
 def centerDir():
     global STEER_SERVO, CURRENT_DIR
@@ -267,9 +269,9 @@ def centerDir():
         # for duty in range(CURRENT_DIR,center,-1):
             # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
             # sleep(0.01)
-    pwmList[STEER_SERVO].ChangeDutyCycle(7.5)
+    pwmList[STEER_SERVO].ChangeDutyCycle(7.55)
+    sleep(.1)
     return
-    CURRENT_DIR = center;
 
 def move():
     global THROTTLE_SERVO, CURRENT_SPEED
@@ -351,7 +353,7 @@ def main():
     gpioSetup()
 
     clientName = "RPIO3B"
-    serverAddress = "192.168.0.25"
+    serverAddress = "172.20.10.10"
     mqttClient = mqtt.Client(clientName)
 
     mqttClient.on_connect = connectionStatus
