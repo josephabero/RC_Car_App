@@ -35,92 +35,64 @@ prev = 0
 manualControl = False
 
 # AUTO CONTROL VARS
- # construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video",help="path to the (optional) video file")
-ap.add_argument("-b", "--buffer", type=int, default=64, help="max buffer size")
-args = vars(ap.parse_args())
 
-# define the lower and upper boundaries of the "green"
-# ball in the HSV color space, then initialize the
-# list of tracked points
-greenLower = (29, 86, 6)
-greenUpper = (64, 255, 255)
-pts = deque(maxlen=args["buffer"])
+# Parse arguments
+parsedArgs = argparse.ArgumentParser()
+parsedArgs.add_argument("-v", "--video",help="path to the (optional) video file")
+parsedArgs.add_argument("-b", "--buffer", type=int, default=64, help="max buffer size")
+finalArgs = vars(parsedArgs.parse_args())
 
-    # if a video path was not supplied, grab the reference
-    # to the webcam
-if not args.get("video", False):
+# lower and upper boundaries of the tennis ball
+tennisLower = (29, 86, 6)
+tennisUpper = (64, 255, 255)
+pts = deque(maxlen=finalArgs["buffer"])
+
+# if a video path was not supplied, use webcam reference
+if not finalArgs.get("video", False):
         vs = VideoStream(src=0).start()
 
-    # otherwise, grab a reference to the video file
+# or use a video file reference
 else:
-        vs = cv2.VideoCapture(args["video"])
+        vs = cv2.VideoCapture(finalArgs["video"])
 
     # allow the camera or video file to warm up
 time.sleep(2.0)
 
-# def turn_left():
-#     print("turning left")
-#     pi_pwm.ChangeDutyCycle(5)
-#     sleep(0.5)
-#     #pi_pwm.ChangeDutyCycle(7.5)
-#
-# def turn_right():
-#     print("turning right")
-#     pi_pwm.ChangeDutyCycle(10)
-#     sleep(0.5)
-#     #pi_pwm.ChangeDutyCycle(7.5)
-#
-# def turn_forward():
-#     print("go forward")
-#     pi_pwm.ChangeDutyCycle(7)
-#     sleep(0.5)
-
-# keep looping
+# OpenCV function
+# Should be called repeatedly in a loop
 def getch():
         global prev
-        # grab the current frame
-        frame = vs.read()
 
-        # handle the frame from VideoCapture or VideoStream
-        frame = frame[1] if args.get("video", False) else frame
+        # store current frame
+        currentFrame = vs.read()
 
-        # if we are viewing a video and we did not grab a frame,
-        # then we have reached the end of the video
-#       if frame is None:
-#               break
+        frame = currentFrame[1] if finalArgs.get("video", False) else currentFrame
 
-        # resize the frame, blur it, and convert it to the HSV
-        # color space
+
+        # resize the frame, blur it, and convert it to the HSV color
         frame = imutils.resize(frame, width=600)
         blurred = cv2.GaussianBlur(frame, (11, 11), 0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-        # construct a mask for the color "green", then perform
-        # a series of dilations and erosions to remove any small
-        # blobs left in the mask
-        mask = cv2.inRange(hsv, greenLower, greenUpper)
+        # erode and dilate mask for the color desired (green)
+        mask = cv2.inRange(hsv, tennisLower, tennisUpper)
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
 
 
-    # find contours in the mask and initialize the current
-        # (x, y) center of the ball
-        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
+        # Use OpenCV to find the countours
+        contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                 cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
+        contours = imutils.grab_contours(contours)
         center = None
 
-        # only proceed if at least one contour was found
-        if len(cnts) > 0:
-                # find the largest contour in the mask, then use
-                # it to compute the minimum enclosing circle and
-                # centroid
-                c = max(cnts, key=cv2.contourArea)
-                ((x, y), radius) = cv2.minEnclosingCircle(c)
-                M = cv2.moments(c)
-                center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        # check if a countour was found
+        if len(contours) > 0:
+                # use largest countour to find minimum enclosing circle
+                largestContour = max(contours, key=cv2.contourArea)
+                ((x, y), radius) = cv2.minEnclosingCircle(largestContour)
+                moment = cv2.moments(largestContour)
+                center = (int(moment["m10"] / moment["m00"]), int(moment["m01"] / moment["m00"]))
               #  print(center)
                 # only proceed if the radius meets a minimum size
                 if radius > 10:
@@ -129,60 +101,36 @@ def getch():
                         cv2.circle(frame, (int(x), int(y)), int(radius),
                                 (0, 255, 255), 2)
                         cv2.circle(frame, center, 5, (0, 0, 255), -1)
-                        #cv2.imshow("Frame", frame)
-                        #print(center)
-                        #print(center[0])
+                        
+                        # Use center point to determine direction the motors should turn
+                        # TURN LEFT
                         if (center[0] >= 0 and center[0] < 100):
-                            # print(center[0])
                             if prev != 1:
                                 prev = 1
                                 print("left " + str(prev))
                                 turnLeft()
+                        # GO FORWARD
                         elif (center[0] >= 100 and center[0] < 440):
-                            # print(center[0])
                             if prev != 2:
                                 prev = 2
                                 print("forward " + str(prev))
                                 centerDir()
-                            #sleep(1.5)
+                        # TURN RIGHT
                         elif (center[0] >= 440 and center[0] < 601):
-                            # print(center[0])
                             if prev != 3:
                                 prev = 3
                                 print("right " + str(prev))
                                 turnRight()
                         else:
                             prev = 0
-                            #pi_pwm.ChangeDutyCycle(7.5)
-                            # print("not found")
-                            # sleep(1.5)
                 else:
                     print("ball not found")
                     sleep(0.5)
                 sleep(.1)
 
-        # update the points queue
-        #pts.appendleft(center)
-
-    # loop over the set of tracked points
-        #for i in range(1, len(pts)):
-                # if either of the tracked points are None, ignore
-                # them
-                #if pts[i - 1] is None or pts[i] is None:
-                        #continue
-
-                # otherwise, compute the thickness of the line and
-                # draw the connecting lines
-                #thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
-                #cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
-
-        # show the frame to our screen
+        # show the frame on the screen
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
-
-        # if the 'q' key is pressed, stop the loop
-    #   if key == ord("q"):
-        #       break
 
 
 def gpioSetup():
@@ -228,31 +176,14 @@ def resetgpio():
 
 def turnRight():
     global STEER_SERVO, CURRENT_DIR, pwmList
-    # right = 20
-    # if(CURRENT_DIR <= right):
-        # for duty in range(CURRENT_DIR,right,1):
-            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            # sleep(0.01)
-    # else:
-        # for duty in range(CURRENT_DIR,right,-1):
-            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            # sleep(0.01)
+    
     pwmList[STEER_SERVO].ChangeDutyCycle(10)
     sleep(.1)
     return
-    # CURRENT_DIR = right;
 
 def turnLeft():
     global STEER_SERVO, CURRENT_DIR
-    # left = 0
-    # if(CURRENT_DIR <= left):
-        # for duty in range(CURRENT_DIR,left,1):
-            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            # sleep(0.01)
-    # else:
-        # for duty in range(CURRENT_DIR,left,-1):
-            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            # sleep(0.01)
+
     pwmList[STEER_SERVO].ChangeDutyCycle(5)
     sleep(.1)
     return
@@ -260,15 +191,6 @@ def turnLeft():
 def centerDir():
     global STEER_SERVO, CURRENT_DIR
 
-    # center = 5
-    # if(CURRENT_DIR <= center):
-        # for duty in range(CURRENT_DIR,center,1):
-            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            # sleep(0.01)
-    # else:
-        # for duty in range(CURRENT_DIR,center,-1):
-            # pwmList[STEER_SERVO].ChangeDutyCycle(duty)
-            # sleep(0.01)
     pwmList[STEER_SERVO].ChangeDutyCycle(7.55)
     sleep(.1)
     return
@@ -276,21 +198,11 @@ def centerDir():
 def move():
     global THROTTLE_SERVO, CURRENT_SPEED
 
-    # maxSpeed = 20
-    # for duty in range(CURRENT_SPEED,maxSpeed,1):
-        # pwmList[THROTTLE_SERVO].ChangeDutyCycle(duty)
-        # sleep(0.01)
-
     pwmList[THROTTLE_SERVO].ChangeDutyCycle(8.15)
     CURRENT_SPEED = maxSpeed
 
 def stop():
     global THROTTLE_SERVO, CURRENT_SPEED
-
-    # stopSpeed = 0
-    # for duty in range(CURRENT_SPEED,stopSpeed,-1):
-        # pwmList[THROTTLE_SERVO].ChangeDutyCycle(duty)
-        # sleep(0.01)
 
     pwmList[THROTTLE_SERVO].ChangeDutyCycle(7.5)
     CURRENT_SPEED = stopSpeed
@@ -365,8 +277,10 @@ def main():
     print("Looping!")
     mqttClient.loop_start()
 
-    print("after loop start")
+    # Continue looping forever
 
+    # If button is pressed by iOS, callback (messageDecoder) will be triggered to handle button press
+    # Otherwise, keep running OpenCV function
     while True:
         if manualControl == False:  getch()
         else:                       sleep(0.5)
