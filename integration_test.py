@@ -137,7 +137,7 @@ def getch():
                             if prev != 1:
                                 prev = 1
                                 print("left " + str(prev))
-                                turnRight()
+                                turnLeft()
                         elif (center[0] >= 100 and center[0] < 440):
                             # print(center[0])
                             if prev != 2:
@@ -150,7 +150,7 @@ def getch():
                             if prev != 3:
                                 prev = 3
                                 print("right " + str(prev))
-                                turnLeft()
+                                turnRight()
                         else:
                             prev = 0
                             #pi_pwm.ChangeDutyCycle(7.5)

@@ -1,0 +1,56 @@
+Developed by:
+
+Joseph Abero
+Vikas Naveen
+Udit Chophla
+Navina Mathew
+
+
+
+
+Motor Control Python Script code to run on the Raspberry Pi for the Autonomous Platform.
+
+
+Prerequisite Setup:
+1. A MQTT server must be running on the Raspberry Pi
+
+- Open a terminal on the Pi and enter
+> mosquitto -v
+
+2. A USB camera should be connected to the Pi
+3. The RC motors should be connected to the Pi
+4. The iOS app should be connected to the MQTT server
+
+
+Once the prerequisites have been setupk, the integrated app may be run by running the command on the pi:
+
+> python3 integration_test.py
+
+
+
+
+There are 2 Modes:
+1. Autonomous Mode
+2. Manual Mode
+
+
+Autonomous Mode
+---------------
+Autonomous Platform is controlled via the camera aboard the platform.
+Control buttons are greyed out and are disabled.
+User may switch to Manual Mode by pressing the middle button.
+
+
+Manual Mode
+-----------
+Autonomous Platform is controlled by the buttons on the iPhone screen.
+Each direction will allow the platform to move in the desired direction.
+User may switch to Autonomous Mode by pressing the middle button.
+
+
+
+
+Initially, the platform will be set in Autonomous Mode.
+
+The mode may be toggled between Autonomous Mode and Manual Mode by the iOS Application.
+
